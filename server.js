@@ -84,3 +84,24 @@ app.post("/pizzas/update/:id", proteger, async (req, res) => {
     await pool.query('UPDATE pizzas SET nome=$1, preco=$2, estoque=$3 WHERE id=$4', [nome, preco, estoque, id]);
     res.redirect('/dashboard');
 });
+
+// deletar pizza
+app.post("/pizzas/delete/:id", proteger, async (req, res) => {
+    const { id } = req.params;
+    await pool.query('DELETE FROM pizzas WHERE id=$1', [id]);
+    res.redirect('/dashboard');
+});     
+
+//registrar venda
+app.post('/vendas', proteger, async (req, res) => {
+    const { pizza_id, quantidade } = req.body;
+    const usuario_id = req.session.usuario.id;
+    await pool.query('INSERT INTO vendas (usuario_id, pizza_id, quantidade, data_venda) VALUES ($1, $2, $3, NOW())', [usuario_id, pizza_id, quantidade]);
+    await pool.query('UPDATE pizzas SET estoque = estoque - $1 WHERE id = $2', [quantidade, pizza_id]);
+    res.redirect('/dashboard');
+});
+
+//servidor
+app.listen(3000, () => {
+    console.log("Servidor rodando em http://localhost:3000");
+});
