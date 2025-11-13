@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cantina</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/base.css">
+    <link rel="stylesheet" href="/dashboard.css">
 </head>
 <body>
     <div class="container">
@@ -40,25 +41,31 @@
     <ul>
         <% foods.forEach(function(food) { %>
             <li>
-                <strong><%= food.name %></strong> - R$ <%= parseFloat(food.preco).toFixed(2) %> - Estoque: <%= food.estoque %>
-                <% if (usuario.tipo === 'admin') { %>
-                    <button type="button" 
-                            data-id="<%= food.id %>" 
-                            data-nome="<%= food.name %>" 
-                            data-descricao="<%= food.descricao || '' %>" 
-                            data-preco="<%= food.preco %>" 
-                            data-estoque="<%= food.estoque %>"
-                            onclick="editarComida(this)">Editar</button>
-                    <form method="POST" action="/foods/delete/<%= food.id %>" style="display:inline;">
-                        <button type="submit" onclick="return confirm('Tem certeza que deseja excluir esta comida?')">Excluir</button>
-                    </form>
-                <% } else { %>
-                    <form method="POST" action="/pedidos" style="display:inline;">
-                        <input type="hidden" name="food_id" value="<%= food.id %>">
-                        <input type="number" name="quantidade" min="1" max="<%= food.estoque %>" value="1" style="width: 50px;">
-                        <button type="submit" <%= food.estoque === 0 ? 'disabled' : '' %>>Pedir</button>
-                    </form>
-                <% } %>
+                <div class="produto-info">
+                    <strong><%= food.name %></strong>
+                    <span>R$ <%= parseFloat(food.preco).toFixed(2) %> • Estoque: <%= food.estoque %></span>
+                </div>
+                <div class="produto-acoes">
+                    <% if (usuario.tipo === 'admin') { %>
+                        <button type="button" 
+                                class="edit"
+                                data-id="<%= food.id %>" 
+                                data-nome="<%= food.name %>" 
+                                data-descricao="<%= food.descricao || '' %>" 
+                                data-preco="<%= food.preco %>" 
+                                data-estoque="<%= food.estoque %>"
+                                onclick="editarComida(this)">Editar</button>
+                        <form method="POST" action="/foods/delete/<%= food.id %>">
+                            <button type="submit" class="delete" onclick="return confirm('Tem certeza que deseja excluir esta comida?')">Excluir</button>
+                        </form>
+                    <% } else { %>
+                        <form method="POST" action="/pedidos">
+                            <input type="hidden" name="food_id" value="<%= food.id %>">
+                            <input type="number" name="quantidade" min="1" max="<%= food.estoque %>" value="1">
+                            <button type="submit" <%= food.estoque === 0 ? 'disabled' : '' %>>Pedir</button>
+                        </form>
+                    <% } %>
+                </div>
             </li>
         <% }); %>
     </ul>

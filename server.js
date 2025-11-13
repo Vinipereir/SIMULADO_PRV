@@ -9,11 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // banco PostgreSQL
 const pool = new Pool({
-    user:"postgres",
-    host:"localhost",
-    database:"cantina",
-    password:"amods",
-    port:7777
+    connectionString: process.env.DATABASE_URL || "postgresql://postgres:amods@localhost:7777/cantina",
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 // configurações 
@@ -213,6 +210,9 @@ app.post('/pedidos', proteger, async (req, res) => {
 });
 
 //servidor
-app.listen(3000, () => {
-    console.log("Servidor rodando em http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
+
+export default app;
