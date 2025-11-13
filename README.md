@@ -153,4 +153,4 @@ O sistema possui dois níveis de acesso:
 
 ---
 
-Desenvolvido com ❤️ para facilitar a gestão de cantinas
+
