@@ -54,6 +54,37 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// registro de novos usuários
+app.get('/registro', (req, res) => res.render("registro", { error: null, success: null }));
+
+app.post('/registro', async (req, res) => {
+    const { nome, email, senha, confirmarSenha } = req.body;
+    
+    // validações
+    if (!nome || !email || !senha || !confirmarSenha) {
+        return res.render('registro', { error: 'Preencha todos os campos!', success: null });
+    }
+    
+    if (senha !== confirmarSenha) {
+        return res.render('registro', { error: 'As senhas não coincidem!', success: null });
+    }
+    
+    try {
+        // verifica se o email já existe
+        const emailExiste = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (emailExiste.rows.length > 0) {
+            return res.render('registro', { error: 'Este email já está cadastrado!', success: null });
+        }
+        
+        // insere o novo usuário com tipo 'user'
+        await pool.query('INSERT INTO usuarios (nome, email, senha, tipo) VALUES ($1, $2, $3, $4)', [nome, email, senha, 'user']);
+        
+        res.render('registro', { error: null, success: 'Cadastro realizado com sucesso! Faça login para continuar.' });
+    } catch (error) {
+        res.render('registro', { error: 'Erro ao cadastrar usuário. Tente novamente.', success: null });
+    }
+});
+
 // logout
 app.get('/logout', (req, res) => {
     req.session.destroy();
