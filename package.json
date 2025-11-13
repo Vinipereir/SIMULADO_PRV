@@ -1,6 +1,7 @@
 {
   "name": "simulado_prv",
   "version": "1.0.0",
+  "type": "module",
   "main": "server.js",
   "dependencies": {
     "accepts": "^2.0.0",
