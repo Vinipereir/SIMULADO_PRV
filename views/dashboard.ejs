@@ -3,13 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cantina</title>
+    <title>Dashboard - Cantina</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h2>Bem-vindo a nossa Cantina 🥪, <%= usuario.nome %></h2>
-    <a href="/logout">Sair</a>
+    <div class="container">
+        <div class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <% if (usuario.tipo === 'admin') { %>
+                <a href="/cadastro-produto">Cadastrar Produto</a>
+                <a href="/gestao-estoque">Gestão de Estoque</a>
+            <% } %>
+            <a href="/logout">Sair</a>
+        </div>
 
-    <h3>Cardápio de Comidas</h3>
+        <h1>Bem-vindo(a) à Cantina, <%= usuario.nome %>! 🥪</h1>
+
+        <h2>Cardápio de Comidas</h2>
     <form method="GET" action="/dashboard">
         <input type="text" name="busca" placeholder="Buscar comida por nome" value="<%= busca %>"/>
         <button type="submit">Buscar</button>

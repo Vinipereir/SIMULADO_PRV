@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Estoque - Cantina</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/cadastro-produto">Cadastrar Produto</a>
+            <a href="/gestao-estoque">Gestão de Estoque</a>
+            <a href="/logout">Sair</a>
+        </div>
+
+        <h1>Gestão de Estoque</h1>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="success"><%= success %></div>
+        <% } %>
+
+        <h2>Atualizar Estoque</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produto</th>
+                    <th>Estoque Atual</th>
+                    <th>Preço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof foods !== 'undefined' && foods.length > 0) { %>
+                    <% foods.forEach(function(food) { %>
+                        <tr>
+                            <td><%= food.id %></td>
+                            <td><%= food.name %></td>
+                            <td><%= food.estoque %></td>
+                            <td>R$ <%= parseFloat(food.preco).toFixed(2) %></td>
+                            <td>
+                                <button class="edit" 
+                                        data-id="<%= food.id %>" 
+                                        data-nome="<%= food.name %>" 
+                                        data-descricao="<%= food.descricao || '' %>" 
+                                        data-preco="<%= food.preco %>" 
+                                        data-estoque="<%= food.estoque %>"
+                                        onclick="abrirModalEditar(this)">Editar</button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Nenhum produto no estoque.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <h2>Histórico de Pedidos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuário</th>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof pedidos !== 'undefined' && pedidos.length > 0) { %>
+                    <% pedidos.forEach(function(pedido) { %>
+                        <tr>
+                            <td><%= pedido.id %></td>
+                            <td><%= pedido.usuario %></td>
+                            <td><%= pedido.comida %></td>
+                            <td><%= pedido.quantidade %></td>
+                            <td><%= pedido.data %></td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Nenhum pedido registrado.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h3>Editar Produto</h3>
+            <form id="formEditar" method="POST">
+                <label for="editName">Nome:</label>
+                <input type="text" id="editName" name="name" required />
+
+                <label for="editDescricao">Descrição:</label>
+                <textarea id="editDescricao" name="descricao" rows="3"></textarea>
+
+                <label for="editPreco">Preço (R$):</label>
+                <input type="number" id="editPreco" name="preco" step="0.01" min="0" required />
+
+                <label for="editEstoque">Estoque:</label>
+                <input type="number" id="editEstoque" name="estoque" min="0" required />
+
+                <button type="submit">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalEditar(btn) {
+            const id = btn.dataset.id;
+            const nome = btn.dataset.nome;
+            const descricao = btn.dataset.descricao;
+            const preco = btn.dataset.preco;
+            const estoque = btn.dataset.estoque;
+            
+            document.getElementById('editName').value = nome;
+            document.getElementById('editDescricao').value = descricao;
+            document.getElementById('editPreco').value = preco;
+            document.getElementById('editEstoque').value = estoque;
+            document.getElementById('formEditar').action = '/foods/update/' + id;
+            document.getElementById('modalEditar').style.display = 'block';
+        }
+
+        function fecharModal() {
+            document.getElementById('modalEditar').style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalEditar');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

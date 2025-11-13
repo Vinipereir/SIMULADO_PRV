@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produto - Cantina</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/cadastro-produto">Cadastrar Produto</a>
+            <a href="/gestao-estoque">Gestão de Estoque</a>
+            <a href="/logout">Sair</a>
+        </div>
+
+        <h1>Cadastro de Produto</h1>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="success"><%= success %></div>
+        <% } %>
+
+        <form method="POST" action="/cadastro-produto">
+            <label for="name">Nome do Produto:</label>
+            <input type="text" id="name" name="name" placeholder="Ex: Coxinha, Pastel, Suco..." required />
+
+            <label for="descricao">Descrição:</label>
+            <textarea id="descricao" name="descricao" rows="3" placeholder="Descrição do produto"></textarea>
+
+            <label for="preco">Preço (R$):</label>
+            <input type="number" id="preco" name="preco" step="0.01" min="0" placeholder="0.00" required />
+
+            <label for="estoque">Quantidade em Estoque:</label>
+            <input type="number" id="estoque" name="estoque" min="0" placeholder="0" required />
+
+            <button type="submit">Cadastrar Produto</button>
+        </form>
+
+        <h2>Produtos Cadastrados</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Preço</th>
+                    <th>Estoque</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (typeof foods !== 'undefined' && foods.length > 0) { %>
+                    <% foods.forEach(function(food) { %>
+                        <tr>
+                            <td><%= food.id %></td>
+                            <td><%= food.name %></td>
+                            <td><%= food.descricao || 'Sem descrição' %></td>
+                            <td>R$ <%= parseFloat(food.preco).toFixed(2) %></td>
+                            <td><%= food.estoque %></td>
+                            <td>
+                                <form method="POST" action="/foods/delete/<%= food.id %>" style="display:inline;">
+                                    <button type="submit" class="delete" onclick="return confirm('Tem certeza que deseja excluir este produto?')">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="6" style="text-align: center;">Nenhum produto cadastrado ainda.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

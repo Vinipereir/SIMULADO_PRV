@@ -18,6 +18,7 @@ const pool = new Pool({
 
 // configurações 
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     secret: 'cantina2025',
     resave: false,
@@ -78,6 +79,39 @@ app.get('/dashboard', proteger, async (req, res) => {
     res.render('dashboard', { usuario: req.session.usuario, foods: foods.rows, pedidos: pedidos.rows, busca });
 });
 
+// página de cadastro de produto
+app.get('/cadastro-produto', protegerAdmin, async (req, res) => {
+    const foods = await pool.query('SELECT * FROM foods ORDER BY id');
+    res.render('cadastro-produto', { foods: foods.rows, error: null, success: null });
+});
+
+// cadastro via página específica
+app.post('/cadastro-produto', protegerAdmin, async (req, res) => {
+    const { name, descricao, preco, estoque } = req.body;
+    if (!name || !preco) {
+        const foods = await pool.query('SELECT * FROM foods ORDER BY id');
+        return res.render('cadastro-produto', { foods: foods.rows, error: 'Preencha os campos obrigatórios!', success: null });
+    }
+    await pool.query('INSERT INTO foods (name, descricao, preco, estoque) VALUES ($1, $2, $3, $4)', [name, descricao, preco, estoque || 0]);
+    const foods = await pool.query('SELECT * FROM foods ORDER BY id');
+    res.render('cadastro-produto', { foods: foods.rows, error: null, success: 'Produto cadastrado com sucesso!' });
+});
+
+// página de gestão de estoque
+app.get('/gestao-estoque', protegerAdmin, async (req, res) => {
+    const foods = await pool.query('SELECT * FROM foods ORDER BY id');
+    const pedidos = await pool.query(`
+        SELECT p.id, u.nome AS usuario, f.name AS comida, ip.quantidade,
+        TO_CHAR(p.data_pedido, 'DD/MM/YYYY HH24:MI') AS data 
+        FROM pedidos p
+        JOIN usuarios u ON p.usuario_id = u.id 
+        JOIN itens_pedido ip ON ip.pedido_id = p.id
+        JOIN foods f ON ip.food_id = f.id 
+        ORDER BY p.data_pedido DESC
+    `);
+    res.render('gestao-estoque', { foods: foods.rows, pedidos: pedidos.rows, error: null, success: null });
+});
+
 // cadastro de foods (apenas admin)
 app.post('/foods', protegerAdmin, async (req, res) => {
     const { name, descricao, preco, estoque } = req.body;
@@ -91,14 +125,16 @@ app.post("/foods/update/:id", protegerAdmin, async (req, res) => {
     const { id } = req.params;
     const { name, descricao, preco, estoque } = req.body;
     await pool.query('UPDATE foods SET name=$1, descricao=$2, preco=$3, estoque=$4 WHERE id=$5', [name, descricao, preco, estoque, id]);
-    res.redirect('/dashboard');
+    const referer = req.get('Referer') || '/dashboard';
+    res.redirect(referer.includes('gestao-estoque') ? '/gestao-estoque' : '/dashboard');
 });
 
 // deletar food (apenas admin)
 app.post("/foods/delete/:id", protegerAdmin, async (req, res) => {
     const { id } = req.params;
     await pool.query('DELETE FROM foods WHERE id=$1', [id]);
-    res.redirect('/dashboard');
+    const referer = req.get('Referer') || '/dashboard';
+    res.redirect(referer.includes('cadastro-produto') ? '/cadastro-produto' : '/dashboard');
 });     
 
 //registrar pedido (users podem pedir)
